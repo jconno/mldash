@@ -1,0 +1,22 @@
+name: appliances_energy
+type: timeseries
+description: Experimental data used to create regression models of appliances energy use in a low energy building.
+source: https://archive.ics.uci.edu/ml/datasets/Appliances+energy+prediction
+reference: APA reference for the dataset.
+data: function ()
+	{
+		destfile <- tempfile()
+		download.file("https://archive.ics.uci.edu/ml/machine-learning-databases/00374/energydata_complete.csv",destfile)
+		df <-  readr::read_csv(destfile)
+		df$y <- df$Appliances
+		df$ds <- df$date
+		df <- df |> tidyr::drop_na(c(ds,y)) |> dplyr::distinct(ds,y)
+		df <- df |> dplyr::filter(!is.na(ds))
+		df <- df |> timetk::summarise_by_time(.date_var = ds,.by = "hour",y = mean(y))
+		df$ds <- lubridate::ymd_hms(df$ds)
+		return(df)
+	}
+model: y ~ ds
+note:
+packages: tidyr,dplyr,readr,lubridate
+model_params: list(freq = 'hours')

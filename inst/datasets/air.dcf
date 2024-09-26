@@ -1,0 +1,25 @@
+name: air
+type: timeseries
+description: Contains the responses of a gas multisensor device deployed on the field in an Italian city. Hourly responses averages are recorded along with gas concentrations references from a certified analyzer.
+source: https://archive.ics.uci.edu/ml/datasets/Air+Quality
+reference: APA reference for the dataset.
+data: function ()
+	{
+		destfile <- tempfile()
+		download.file("https://archive.ics.uci.edu/ml/machine-learning-databases/00360/AirQualityUCI.zip",destfile)
+		df <- read.csv(unz(destfile, "AirQualityUCI.csv"), sep = ";" ,header = TRUE)
+		df$ds <- lubridate::as_datetime(as.POSIXct(paste(df$Date, df$Time), format = "%d/%m/%Y%H.%M.%S"))
+		df$y <- as.numeric(gsub(",", ".", df$CO.GT.))
+		df <- df |> tidyr::drop_na(c(ds,y)) |> dplyr::select(ds,y) |> dplyr::distinct(ds,y)
+		df <- df |> dplyr::filter(!is.na(ds)) |> dplyr::filter(ds > as.Date("2005-01-01"))
+		df <- df |> dplyr::filter(!y < 0)
+		df$ds <- lubridate::ymd_hms(df$ds)
+		tb <- df |> dplyr::select( ds, y) |> tsibble::as_tsibble(index = ds)
+		tb <- tsibble::fill_gaps(tb, .full = TRUE, y = dplyr::last(y))
+		df <- data.frame(tb)
+		return(df)
+	}
+model: y ~ ds
+note:
+packages: tidyr,dplyr,lubridate,tsibble
+model_params: list(freq = 'hours')

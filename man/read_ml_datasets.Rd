@@ -6,9 +6,10 @@
 \usage{
 read_ml_datasets(
   dir = c(paste0(find.package("mldash"), "/datasets")),
-  cache_dir = tempdir(),
+  cache_dir = dir,
   pattern = "*.dcf",
-  use_cache = TRUE
+  use_cache = TRUE,
+  check_for_missing_packages = interactive()
 )
 }
 \arguments{
@@ -21,17 +22,20 @@ be a single filename to test a metadata file.}
 \item{use_cache}{whether to read data from the cache if available. If FALSE,
 then the data will be retrieved from the \code{data} function parameter.}
 
+\item{check_for_missing_packages}{if TRUE you will be prompted to install
+missing packages.}
+
 \item{data_cache}{directory where rds data files will be stored.}
 }
 \value{
 a data frame with the following fields:
 \itemize{
-\item{name*}{The name of the dataset.}
+\item{id}{The filename of the dataset.}
+\item{title*}{The name of the dataset from the dcf file.}
 \item{type*}{Whether this is for a regression or classification model.}
 \item{description}{Description of the dataset.}
 \item{source}{The source of the dataset.}
 \item{reference}{Reference for the dataset (APA format preferred).}
-\item{url}{URL to download the dataset.}
 \item{model*}{The model formula used for the predictive model.}
 \item{note}{Any additional information.}
 }
@@ -47,13 +51,12 @@ RMarkdown YAML (i.e. metadata).
 \details{
 \itemize{
 \item{name*}{The name of the dataset.}
-\item{type*}{Whether this is for a regression or classification model.}
+\item{type*}{Whether this is for a regression, classification, timeseries, or spatial model.}
 \item{description}{Description of the dataset.}
 \item{source}{The source of the dataset.}
 \item{reference}{Reference for the dataset (APA format preferred).}
-\item{url}{URL to download the dataset.}
 \item{data*}{An R function that returns a data.frame.}
-\item{model*}{The model formula used for the predictive model.}
+\item{model*}{The formula used for the predictive model.}
 \item{note}{Any additional information.}
 }
 \itemize{
